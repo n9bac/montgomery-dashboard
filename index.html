@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Montgomery Smart Dashboard - Hackathon 2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM (Using stable versions) -->
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <!-- Prop-Types (Required by some UMD builds of Recharts) -->
+    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    <!-- Recharts (Specific version for better UMD compatibility) -->
+    <script src="https://unpkg.com/recharts@2.10.3/umd/Recharts.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #0a0c10; color: #cbd5e1; margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .chart-container .recharts-cartesian-grid-horizontal line { stroke: #ffffff10; }
+        .chart-container .recharts-cartesian-grid-vertical line { stroke: #ffffff10; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Safe access to Recharts components
+        const { 
+            AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
+        } = window.Recharts || {};
+
+        const Icon = ({ name, size = 20, className = "" }) => {
+            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
+        };
+
+        const neighborhoodData = [
+            { name: 'Garden District', score: 92, growth: 4.2, safety: 88, psychology: 'Need for historical identity and strong social connection' },
+            { name: 'Cloverdale', score: 85, growth: 3.8, safety: 91, psychology: 'Search for long-term stability and proximity to green spaces' },
+            { name: 'Downtown', score: 78, growth: 5.5, safety: 72, psychology: 'Necessity for urban efficiency and cultural stimulation' },
+            { name: 'East Montgomery', score: 81, growth: 4.9, safety: 85, psychology: 'Desire for modernity and family-oriented services' },
+        ];
+
+        const App = () => {
+            const [selectedArea, setSelectedArea] = useState(neighborhoodData[0]);
+            const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [selectedArea, isAnalyzing]);
+
+            const handleAnalyze = () => {
+                setIsAnalyzing(true);
+                setTimeout(() => setIsAnalyzing(false), 1500);
+            };
+
+            if (!window.Recharts) {
+                return <div className="p-10 text-center text-red-500">Error: Recharts library failed to load. Please refresh.</div>;
+            }
+
+            return (
+                <div className="min-h-screen bg-[#0a0c10] text-slate-200">
+                    <header className="border-b border-white/5 bg-[#0d1117]/80 backdrop-blur-md sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                                    <Icon name="building-2" className="text-white" />
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-bold text-white tracking-tight">RealEstateAlly <span className="text-indigo-400">Pro</span></h1>
+                                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">Montgomery Intelligence</p>
+                                </div>
+                            </div>
+                            <div className="text-right hidden sm:block">
+                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Hackathon Mode</p>
+                                <p className="text-xs text-emerald-400 font-mono">LIVE_DATA_FEED_ON</p>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="max-w-7xl mx-auto px-6 py-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            <div className="lg:col-span-4 space-y-6">
+                                <div className="bg-[#161b22] border border-white/10 rounded-3xl p-6 shadow-2xl">
+                                    <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                        <Icon name="brain" className="text-indigo-400" />
+                                        Psychographic Profiling
+                                    </h2>
+                                    <div className="space-y-4">
+                                        <textarea 
+                                            className="w-full bg-[#0d1117] border border-white/5 rounded-2xl p-4 text-sm outline-none h-32 text-slate-300 resize-none mt-1"
+                                            placeholder="Example: Young family, looking for safety..."
+                                            defaultValue="Professional couple, working from home. Looking for a quiet environment with parks."
+                                        />
+                                        <button 
+                                            onClick={handleAnalyze}
+                                            disabled={isAnalyzing}
+                                            className="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-2xl font-bold text-white transition-all flex items-center justify-center gap-3 shadow-xl"
+                                        >
+                                            {isAnalyzing ? "Analyzing..." : "Run AI Match"}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="bg-[#161b22] border border-white/10 rounded-3xl p-6">
+                                    <h3 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Neighborhoods</h3>
+                                    <div className="space-y-3">
+                                        {neighborhoodData.map((area) => (
+                                            <button
+                                                key={area.name}
+                                                onClick={() => setSelectedArea(area)}
+                                                className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedArea.name === area.name ? 'bg-indigo-600/10 border-indigo-500/50' : 'bg-[#0d1117] border-white/5 hover:border-white/10'}`}
+                                            >
+                                                <span className={`text-sm font-semibold ${selectedArea.name === area.name ? 'text-white' : 'text-slate-400'}`}>{area.name}</span>
+                                                <Icon name="chevron-right" size={14} className={selectedArea.name === area.name ? 'text-indigo-400' : 'text-slate-700'} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-8 space-y-6">
+                                <div className="bg-gradient-to-br from-[#1c2128] to-[#161b22] border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden shadow-2xl">
+                                    <div className="relative z-10">
+                                        <h2 className="text-5xl font-black text-white mb-2">{selectedArea.name}</h2>
+                                        <p className="text-slate-400 text-sm mb-8">Data-driven match for your client profile.</p>
+                                        
+                                        <div className="flex gap-6 mb-8">
+                                            <div className="bg-[#0d1117] p-4 rounded-2xl border border-white/5 text-center flex-1">
+                                                <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Match Score</p>
+                                                <p className="text-3xl font-black text-indigo-500">{selectedArea.score}%</p>
+                                            </div>
+                                            <div className="bg-[#0d1117] p-4 rounded-2xl border border-white/5 text-center flex-1">
+                                                <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Growth</p>
+                                                <p className="text-3xl font-black text-emerald-500">+{selectedArea.growth}%</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white/5 rounded-3xl p-6 border border-white/5">
+                                            <div className="flex items-center gap-2 mb-2 text-rose-400 font-bold text-xs uppercase">Psychological Insight</div>
+                                            <p className="text-slate-300 italic">"{selectedArea.psychology}"</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-[#161b22] border border-white/10 rounded-3xl p-6 h-[300px] chart-container">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={[{m:'Jan',p:180},{m:'Feb',p:185},{m:'Mar',p:182},{m:'Apr',p:190},{m:'May',p:198},{m:'Jun',p:205}]}>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                            <XAxis dataKey="m" stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
+                                            <YAxis stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
+                                            <Tooltip contentStyle={{ backgroundColor: '#0d1117', border: 'none', borderRadius: '8px', color: '#fff' }} />
+                                            <Area type="monotone" dataKey="p" stroke="#6366f1" fill="#6366f1" fillOpacity={0.1} strokeWidth={2} />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
