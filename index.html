@@ -3,33 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urban Ally - Strategic Business Intelligence</title>
+    <title>Urban Ally - Strategic Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
         body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #0f172a; 
-            color: #f8fafc;
-            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #0f172a;
         }
-        .fade-enter-active { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        /* Preveniamo conflitti di layout durante le transizioni */
-        .content-area {
-            min-height: 600px;
         }
     </style>
 </head>
@@ -37,7 +27,83 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState } = React;
+        
+        // Custom SVG Icon Components with Fragments to handle multiple elements
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const icons = {
+                LayoutGrid: <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" />,
+                Zap: <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />,
+                Database: <path d="M12 3c-4.97 0-9 1.79-9 4s4.03 4 9 4 9-1.79 9-4-4.03-4-9-4zm0 18c-4.97 0-9-1.79-9-4V10c0 2.21 4.03 4 9 4s9-1.79 9-4v7c0 2.21-4.03 4-9 4z" />,
+                ChevronRight: <path d="m9 18 6-6-6-6" />,
+                Users: (
+                    <>
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </>
+                ),
+                ShieldCheck: (
+                    <>
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </>
+                ),
+                Cpu: (
+                    <>
+                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
+                        <path d="M9 9h6v6H9z"/><path d="M15 2v2"/><path d="M9 2v2"/><path d="M20 15h2"/>
+                        <path d="M20 9h2"/><path d="M15 20v2"/><path d="M9 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/>
+                    </>
+                ),
+                ShoppingCart: (
+                    <>
+                        <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                    </>
+                ),
+                MapPin: (
+                    <>
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </>
+                ),
+                TrendingUp: (
+                    <>
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
+                    </>
+                ),
+                ScanEye: (
+                    <>
+                        <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+                        <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+                        <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+                        <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M7 12c.5-1.5 2-2.5 5-2.5s4.5 1 5 2.5c-.5 1.5-2 2.5-5 2.5s-4.5-1-5-2.5z"/>
+                    </>
+                )
+            };
+
+            return (
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={size}
+                    height={size}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={className}
+                >
+                    {icons[name]}
+                </svg>
+            );
+        };
 
         const neighborhoodData = [
             {
@@ -46,11 +112,11 @@
                 avgAge: 32,
                 incomeLevel: 'Medium-High',
                 successRate: '92%',
-                psychographic: 'Young professionals, culture enthusiasts, career-oriented and socially active individuals.',
+                psychographic: 'Young professionals, culture enthusiasts, career-oriented and socially active.',
                 dominantProfile: 'Millennials / Gen Z',
                 topNeeds: ['Coworking Spaces', 'Gaming Centers', 'Gourmet Street Food'],
-                infra: 'Requires East Bypass integration to manage high evening traffic flow.',
-                marketTrend: '+12.4% YoY Growth'
+                infra: 'Requires integration with East Bypass to manage evening traffic flows.',
+                marketTrend: '+12.4% Annual Growth'
             },
             {
                 id: 'cloverdale',
@@ -58,10 +124,10 @@
                 avgAge: 45,
                 incomeLevel: 'High',
                 successRate: '87%',
-                psychographic: 'Established families, focus on education, high purchasing power, quality-driven consumers.',
+                psychographic: 'Stable families, education focus, high purchasing power, quality-oriented.',
                 dominantProfile: 'Families / Seniors',
-                topNeeds: ['Healthcare Services', 'Luxury Boutiques', 'Educational Hubs'],
-                infra: 'Main Road roundabout implementation to facilitate pedestrian accessibility.',
+                topNeeds: ['Health Services', 'Luxury Boutiques', 'Educational Hubs'],
+                infra: 'Roundabout implementation on main street for pedestrian accessibility.',
                 marketTrend: '+4.2% Stability'
             },
             {
@@ -70,10 +136,10 @@
                 avgAge: 28,
                 incomeLevel: 'Medium',
                 successRate: '79%',
-                psychographic: 'Growing population, dynamic, seeking convenience and practical everyday services.',
+                psychographic: 'Growing dynamic population, seeks convenience and practical services.',
                 dominantProfile: 'Students / Young Workers',
-                topNeeds: ['Esports Arenas', 'Quality Discount Retail', 'Public Admin Offices'],
-                infra: 'Bypass Exit at KM 14 is essential for efficient logistics and goods transport.',
+                topNeeds: ['Esports Arenas', 'Quality Discount Retail', 'Public Offices'],
+                infra: 'Bypass Exit at KM 14 essential for efficient logistics.',
                 marketTrend: '+18.7% Emerging'
             }
         ];
@@ -82,21 +148,10 @@
             const [selectedId, setSelectedId] = useState(neighborhoodData[0].id);
             const [currentData, setCurrentData] = useState(neighborhoodData[0]);
             const [isAnalyzing, setIsAnalyzing] = useState(false);
-            
-            // Usiamo un ref per gestire l'inizializzazione delle icone in modo sicuro
-            const mainRef = useRef(null);
-
-            useEffect(() => {
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-            }, [currentData, isAnalyzing]);
 
             const handleAnalyze = () => {
                 if (isAnalyzing) return;
                 setIsAnalyzing(true);
-                
-                // Transizione fluida senza smontare bruscamente i nodi
                 setTimeout(() => {
                     const newData = neighborhoodData.find(n => n.id === selectedId);
                     setCurrentData(newData);
@@ -105,12 +160,11 @@
             };
 
             return (
-                <div className="min-h-screen flex flex-col md:flex-row" ref={mainRef}>
-                    {/* Sidebar */}
+                <div className="min-h-screen bg-[#0f172a] text-slate-200 flex flex-col md:flex-row overflow-x-hidden">
                     <aside className="w-full md:w-80 bg-slate-900/95 p-6 flex flex-col border-r border-slate-800 z-20">
                         <div className="flex items-center gap-3 mb-10">
-                            <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg shadow-blue-600/20">
-                                <i data-lucide="layout-grid" className="text-white w-6 h-6"></i>
+                            <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg shadow-blue-600/20 text-white">
+                                <Icon name="LayoutGrid" size={24} />
                             </div>
                             <div>
                                 <h1 className="text-xl font-black tracking-tight text-white uppercase leading-none">URBAN ALLY</h1>
@@ -118,9 +172,15 @@
                             </div>
                         </div>
 
-                        <nav className="flex-1 space-y-8">
-                            <div>
-                                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-4 block text-center md:text-left">District Selection</label>
+                        <nav className="flex-1 space-y-6">
+                            <div className="space-y-2">
+                                <div className="w-full flex items-center gap-3 p-3.5 rounded-xl text-sm font-medium bg-blue-600 text-white shadow-lg shadow-blue-900/20">
+                                    <Icon name="TrendingUp" size={18} /> Analysis Dashboard
+                                </div>
+                            </div>
+
+                            <div className="pt-6 border-t border-slate-800">
+                                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-4 block">District Selection</label>
                                 <div className="space-y-2">
                                     {neighborhoodData.map(n => (
                                         <button 
@@ -137,46 +197,34 @@
                                         </button>
                                     ))}
                                 </div>
-                            </div>
 
-                            <button 
-                                onClick={handleAnalyze}
-                                disabled={isAnalyzing}
-                                className="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] disabled:bg-slate-800/50 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-3 shadow-xl shadow-blue-900/40 text-white"
-                            >
-                                {isAnalyzing ? (
-                                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                                ) : (
-                                    <React.Fragment>
-                                        <i data-lucide="zap" className="w-4 h-4 fill-white"></i> 
-                                        <span>Process Match</span>
-                                    </React.Fragment>
-                                )}
-                            </button>
+                                <button 
+                                    onClick={handleAnalyze}
+                                    disabled={isAnalyzing}
+                                    className="w-full mt-6 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] disabled:bg-slate-800/50 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-3 shadow-xl shadow-blue-900/40 text-white"
+                                >
+                                    {isAnalyzing ? (
+                                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                    ) : (
+                                        <div className="flex items-center gap-3">
+                                            <Icon name="Zap" size={16} /> 
+                                            <span>Process Match</span>
+                                        </div>
+                                    )}
+                                </button>
+                            </div>
                         </nav>
-
-                        <div className="mt-auto pt-8 border-t border-slate-800/50 hidden md:block">
-                            <div className="p-5 bg-slate-800/40 rounded-2xl border border-white/5 space-y-3">
-                                <div className="flex items-center gap-2 text-[10px] text-blue-400 font-bold uppercase tracking-wider">
-                                    <i data-lucide="database" className="w-3 h-3"></i> Core Statistics
-                                </div>
-                                <p className="text-xs text-slate-400 leading-relaxed">
-                                    Analisi in tempo reale dei flussi demografici e dei pattern di mobilità urbana.
-                                </p>
-                            </div>
-                        </div>
                     </aside>
 
-                    {/* Main Report Area */}
-                    <main className="flex-1 p-6 md:p-12 overflow-y-auto bg-[#0f172a] relative content-area">
+                    <main className="flex-1 p-6 md:p-12 overflow-y-auto relative">
                         <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-blue-600/5 blur-[120px] rounded-full pointer-events-none"></div>
                         
                         <div className="max-w-5xl mx-auto space-y-10 relative z-10">
                             <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                 <div>
                                     <nav className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
-                                        <span>Dashboard</span>
-                                        <i data-lucide="chevron-right" className="w-3 h-3 text-slate-600"></i>
+                                        <span>Urban Ally</span>
+                                        <Icon name="ChevronRight" size={12} />
                                         <span className="text-blue-500">Analytics</span>
                                     </nav>
                                     <h2 className="text-5xl font-black text-white tracking-tight">Market Intelligence</h2>
@@ -184,124 +232,76 @@
                                         Strategic insights for <span className="text-white font-semibold underline decoration-blue-500 decoration-2 underline-offset-4">{currentData.name}</span>
                                     </p>
                                 </div>
-                                <div className="flex flex-col items-end gap-2">
-                                    <div className="px-4 py-2 bg-slate-800/80 backdrop-blur rounded-full text-[10px] font-black text-slate-300 uppercase tracking-widest border border-white/10 flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                                        AI-Engine Active
-                                    </div>
-                                    <span className="text-[10px] text-slate-500 font-medium italic">Alleato Urbano Strategico</span>
-                                </div>
                             </header>
 
                             {isAnalyzing ? (
-                                <div className="py-32 text-center space-y-8 fade-enter-active">
+                                <div className="py-32 text-center space-y-8 animate-pulse">
                                     <div className="relative inline-block">
                                         <div className="w-24 h-24 border-4 border-blue-600/10 border-t-blue-500 rounded-full animate-spin"></div>
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                            <i data-lucide="scan-eye" className="w-8 h-8 text-blue-400 animate-pulse"></i>
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-400">
+                                            <Icon name="ScanEye" size={32} />
                                         </div>
                                     </div>
-                                    <div className="space-y-3">
-                                        <h3 className="text-2xl font-black text-white tracking-tight">Processing Big Data Hub...</h3>
-                                        <p className="text-slate-400 max-w-sm mx-auto text-sm font-medium">
-                                            Correlazione tra valori immobiliari e densità demografica comportamentale.
-                                        </p>
-                                    </div>
+                                    <h3 className="text-2xl font-black text-white tracking-tight">Processing Big Data Hub...</h3>
                                 </div>
                             ) : (
-                                <div className="space-y-8 fade-enter-active">
-                                    {/* Metrics Grid */}
+                                <div className="space-y-8 animate-fade-in">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        <div className="glass-card p-6 rounded-[2rem] hover:bg-slate-800/60 transition-colors group">
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-wider">Median Age</p>
-                                            <p className="text-4xl font-black text-white group-hover:text-blue-400 transition-colors">{currentData.avgAge}</p>
-                                            <div className="mt-2 text-[10px] text-slate-400">Target Segment Focus</div>
+                                        <div className="bg-slate-800/40 p-6 rounded-[2rem] border border-white/5">
+                                            <p className="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-wider">Avg Age</p>
+                                            <p className="text-4xl font-black text-white">{currentData.avgAge}</p>
                                         </div>
-                                        <div className="glass-card p-6 rounded-[2rem]">
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-wider">Income Tier</p>
-                                            <p className="text-3xl font-black text-white uppercase tracking-tight">{currentData.incomeLevel}</p>
-                                            <div className="mt-2 text-[10px] text-slate-400">Purchasing Power Index</div>
+                                        <div className="bg-slate-800/40 p-6 rounded-[2rem] border border-white/5">
+                                            <p className="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-wider">Income</p>
+                                            <p className="text-3xl font-black text-white uppercase">{currentData.incomeLevel}</p>
                                         </div>
-                                        <div className="glass-card p-6 rounded-[2rem]">
+                                        <div className="bg-slate-800/40 p-6 rounded-[2rem] border border-white/5">
                                             <p className="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-wider">Compatibility</p>
                                             <p className="text-4xl font-black text-emerald-400">{currentData.successRate}</p>
-                                            <div className="mt-2 text-[10px] text-emerald-500/70 font-bold">High Potential</div>
                                         </div>
-                                        <div className="glass-card p-6 rounded-[2rem]">
+                                        <div className="bg-slate-800/40 p-6 rounded-[2rem] border border-white/5">
                                             <p className="text-[10px] text-slate-500 font-bold uppercase mb-2 tracking-wider">Market Trend</p>
                                             <p className="text-xl font-black text-blue-400">{currentData.marketTrend}</p>
-                                            <div className="mt-2 text-[10px] text-slate-400">Projected 12m Performance</div>
                                         </div>
                                     </div>
 
-                                    {/* Psychographic Insight Hero */}
                                     <div className="bg-blue-600 rounded-[3rem] p-8 md:p-14 shadow-2xl shadow-blue-900/40 relative overflow-hidden group">
-                                        <div className="relative z-10 max-w-2xl">
-                                            <div className="flex items-center gap-3 mb-6">
-                                                <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-[10px] font-black text-white uppercase tracking-widest border border-white/20">
-                                                    Deep Profile Analysis
-                                                </span>
-                                            </div>
-                                            <h3 className="text-2xl md:text-5xl font-black text-white leading-[1.1] mb-8 transition-transform group-hover:scale-[1.01]">
+                                        <div className="relative z-10">
+                                            <h3 className="text-2xl md:text-5xl font-black text-white leading-[1.1] mb-8">
                                                 "{currentData.psychographic}"
                                             </h3>
                                             <div className="flex flex-wrap gap-3">
                                                 <div className="flex items-center gap-2 px-5 py-2.5 bg-white/10 rounded-2xl border border-white/10 text-sm font-bold text-white">
-                                                    <i data-lucide="users" className="w-4 h-4"></i>
-                                                    Core: {currentData.dominantProfile}
-                                                </div>
-                                                <div className="flex items-center gap-2 px-5 py-2.5 bg-black/20 rounded-2xl border border-white/5 text-sm font-bold text-blue-100">
-                                                    <i data-lucide="shield-check" className="w-4 h-4 text-emerald-400"></i>
-                                                    AI Strategy Verified
+                                                    <Icon name="Users" size={18} /> Core: {currentData.dominantProfile}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="absolute -bottom-10 -right-10 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700">
-                                            <i data-lucide="cpu" className="w-80 h-80 text-white"></i>
+                                        <div className="absolute -bottom-10 -right-10 opacity-10 rotate-12 text-white">
+                                            <Icon name="Cpu" size={320} />
                                         </div>
                                     </div>
 
-                                    {/* Bottom Grid */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="glass-card p-8 rounded-[2.5rem] relative overflow-hidden">
-                                            <div className="flex items-center justify-between mb-8">
-                                                <h4 className="font-black text-white uppercase text-xs tracking-[0.2em] flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                                                        <i data-lucide="shopping-cart" className="text-blue-400 w-4 h-4"></i>
-                                                    </div>
-                                                    Merchant Opportunities
-                                                </h4>
-                                            </div>
+                                        <div className="bg-slate-800/40 p-8 rounded-[2.5rem] border border-white/5">
+                                            <h4 className="font-black text-white uppercase text-xs tracking-[0.2em] flex items-center gap-3 mb-8">
+                                                <Icon name="ShoppingCart" size={16} className="text-blue-400" /> Opportunities
+                                            </h4>
                                             <div className="space-y-4">
                                                 {currentData.topNeeds.map((need, i) => (
-                                                    <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-800/30 border border-white/5 hover:bg-slate-800/50 transition-colors group">
-                                                        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center font-bold text-blue-400 text-sm group-hover:bg-blue-600 group-hover:text-white transition-all">
-                                                            {i+1}
-                                                        </div>
+                                                    <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-800/30 border border-white/5">
                                                         <span className="text-slate-200 font-bold text-lg">{need}</span>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
 
-                                        <div className="bg-amber-500/5 border border-amber-500/10 p-8 rounded-[2.5rem] flex flex-col justify-between group">
-                                            <div>
-                                                <h4 className="font-black text-amber-500 mb-6 flex items-center gap-3 uppercase text-xs tracking-[0.2em]">
-                                                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                                                        <i data-lucide="map-pin" className="w-4 h-4 text-amber-500"></i>
-                                                    </div>
-                                                    Urban Logistics Framework
-                                                </h4>
-                                                <div className="relative">
-                                                    <p className="text-xl text-amber-100/90 leading-relaxed font-medium italic border-l-4 border-amber-500/40 pl-6 py-2">
-                                                        "{currentData.infra}"
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="mt-8 pt-8 border-t border-amber-500/10 flex items-center justify-between">
-                                                <span className="text-[10px] font-bold text-amber-500/60 uppercase tracking-widest">Impact Level: Critical</span>
-                                                <i data-lucide="trending-up" className="w-5 h-5 text-amber-500/40 group-hover:translate-x-1 transition-transform"></i>
-                                            </div>
+                                        <div className="bg-amber-500/5 border border-amber-500/10 p-8 rounded-[2.5rem]">
+                                            <h4 className="font-black text-amber-500 mb-6 flex items-center gap-3 uppercase text-xs tracking-[0.2em]">
+                                                <Icon name="MapPin" size={16} /> Logistics
+                                            </h4>
+                                            <p className="text-xl text-amber-100/90 leading-relaxed font-medium italic border-l-4 border-amber-500/40 pl-6 py-2">
+                                                "{currentData.infra}"
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
